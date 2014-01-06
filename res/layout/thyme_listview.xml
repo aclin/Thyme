@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+    
+    <TextView
+        android:id="@+id/lvFirstName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="#FF0000FF"
+        android:text="First name" />
+    
+    <TextView
+        android:id="@+id/lvLastName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="#FF0000FF"
+        android:text="Last name" />
+    
+    <TextView
+        android:id="@+id/lvEmail"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="#FF5599CC"
+        android:text="user@email.com" />
+    
+    <TextView
+        android:id="@+id/lvSite"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Site" />
+    
+    <TextView
+        android:id="@+id/lvNumber"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="#FF0000"
+        android:text="000-000-0000" />
+        
+
+</LinearLayout>
