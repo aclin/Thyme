@@ -102,7 +102,7 @@ public class ThymeContacts extends Activity {
     }
 	
 	// Get data from Zoho Creator report
-	private void postData() throws JSONException {
+	private JSONObject postData() throws JSONException {
 //			HttpClient httpclient = HttpClientBuilder.create().build();
 		HttpClient httpclient = new DefaultHttpClient();
 		
@@ -110,6 +110,8 @@ public class ThymeContacts extends Activity {
 //			httpget.getParams().setParameter("authtoken", MURSHAW_TOKEN);
 //			httpget.getParams().setParameter("scope", "creatorapi");
 //			httpget.getParams().setParameter("raw", "true");
+		
+		JSONObject json = null;
 		
 		try {
 			HttpResponse response = httpclient.execute(httpget);
@@ -134,28 +136,28 @@ public class ThymeContacts extends Activity {
 						e.printStackTrace();
 					}
 				}
-				final String responseString = sb.toString();
+				String responseString = sb.toString();
 //					httpHandler.post(new Runnable() {
 //						@Override
 //						public void run() {
 //							tvResponse.setText(responseString);
 //						}
 //					});
-				JSONObject json = new JSONObject(responseString);
-				String s = json.getJSONArray("Sirius").toString();
-				Log.i("S DATA", s);
-				JSONTokener jsonToken = new JSONTokener(s);
-				Object obj;
-				while (jsonToken.more()) {
-					obj = jsonToken.nextValue();
-					Log.i("DATA", obj.toString());
-					if (obj instanceof JSONArray) {
-						JSONArray result = (JSONArray) obj;
-						parseJSON(result);
-					} else {
-						Log.i("DATA", "NOT JSON Array!");
-					}
-				}
+				json = new JSONObject(responseString);
+//				String s = json.getJSONArray("Sirius").toString();
+//				Log.i("S DATA", s);
+//				JSONTokener jsonToken = new JSONTokener(s);
+//				Object obj;
+//				while (jsonToken.more()) {
+//					obj = jsonToken.nextValue();
+//					Log.i("DATA", obj.toString());
+//					if (obj instanceof JSONArray) {
+//						JSONArray result = (JSONArray) obj;
+//						parseJSON(result);
+//					} else {
+//						Log.i("DATA", "NOT JSON Array!");
+//					}
+//				}
 			}
 		} catch (ClientProtocolException e) {
 			Log.e(TAG, "Client Protocol Exception:");
@@ -163,7 +165,11 @@ public class ThymeContacts extends Activity {
 		} catch (IOException e) {
 			Log.e(TAG, "IO Exception:");
 			e.printStackTrace();
+		} finally {
+			return json;
 		}
+		
+//		return json;
 	}
 	
 	private void parseJSON(JSONArray ja) {
@@ -195,7 +201,23 @@ public class ThymeContacts extends Activity {
 		@Override
 		protected Void doInBackground(Void... unused) {
 			try {
-    			postData();
+    			JSONObject json = postData();
+    			if (json != null) {
+					JSONTokener token = new JSONTokener(json.getJSONArray("Sirius").toString());
+					Object obj;
+					while (token.more()) {
+						obj = token.nextValue();
+						Log.i("DATA", obj.toString());
+						if (obj instanceof JSONArray) {
+							JSONArray result = (JSONArray) obj;
+							parseJSON(result);
+						} else {
+							Log.i("DATA", "NOT JSON Array!");
+						}
+					}
+				} else {
+					// Some manner of server error since there was no response
+				}
     		} catch (JSONException e) {
     			Log.e(TAG, "JSON Exception Error:");
     			e.printStackTrace();

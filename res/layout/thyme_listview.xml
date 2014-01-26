@@ -23,7 +23,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textColor="#FF5599CC"
-        android:text="user@email.com" />
+        android:text="user@email.com"
+        android:autoLink="email"
+        android:linksClickable="true" />
     
     <TextView
         android:id="@+id/lvSite"
@@ -36,7 +38,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textColor="#FF0000"
-        android:text="000-000-0000" />
+        android:text="000-000-0000"
+        android:autoLink="phone"
+        android:linksClickable="true" />
         
 
 </LinearLayout>

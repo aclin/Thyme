@@ -47,7 +47,8 @@ public class OpenActivity extends Activity implements View.OnClickListener {
 			startActivity(iContacts);
 			break;
 		case R.id.btnFindMe:
-//			iFindGPS = new Intent().setClass(this, ThymeActivity.class);
+			iFindGPS = new Intent().setClass(this, ThymeActivity.class);
+			startActivity(iFindGPS);
 			break;
 		default:
 			break;

@@ -8,28 +8,44 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context=".ThymeActivity" >
 
+    <!-- <ProgressBar
+        android:id="@+id/pb_gps"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        style="@android:style/Widget.ProgressBar.Horizontal"
+        android:visibility="invisible" /> -->"
+    
     <TextView
         android:id="@+id/loading"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         android:text="@string/loadingGPS" />
+    
+    <ProgressBar
+        android:id="@+id/pb_gps"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/loading"
+        android:indeterminate="true"
+        style="@android:style/Widget.ProgressBar.Horizontal" />
         
-    <TextView
+<!--     <TextView
         android:id="@+id/gpsInfo"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/loading"
         android:text="@string/gps_info" />
     
-    <TextView
+	<TextView
         android:id="@+id/mockInfo"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/gpsInfo"
         android:text="@string/mock_info" />
     
-<!--     <TextView
+    <TextView
         android:id="@+id/test"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

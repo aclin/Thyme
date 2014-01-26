@@ -7,6 +7,7 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.TreeMap;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
@@ -29,7 +30,6 @@ import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Message;
 import android.util.Log;
 import android.view.Menu;
 import android.view.View;
@@ -37,6 +37,7 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.SimpleAdapter;
 import android.widget.SimpleAdapter.ViewBinder;
 import android.widget.TextView;
@@ -54,6 +55,7 @@ public class ThymeActivity extends Activity {
 	
 	private static final String MURSHAW_TOKEN = "cedbc4971aed515dc6d665f95f89e095";
 	private static final String mock = "5237 Rosemead Blvd, San Gabriel, CA";
+//	private static final String mocks[] = {"fox", "dog", "cat"};
 	
 	private Context context;
 	
@@ -61,15 +63,21 @@ public class ThymeActivity extends Activity {
 	private Location mLoc;
 	private LocationManager mLocationManager;
 	private Geocoder gc;
+	private double mLat, mLng;
 	private double lat, lng;
 	
 	private TextView tvLocation, tvMock, tvLoading;
 	private TextView tvResponse;
+	private ProgressBar mProgress;
 	
 	private ListView lvContacts;
 	private ArrayList<HashMap<String, Object>> listItem;
 	private SimpleAdapter listItemAdapter;
 	private int queryLength;
+	
+	private JSONObject mJson;
+	private ArrayList<String> addresses;
+	private TreeMap<Double, HashMap<String, Object>> tree;
 	
 	private String[] arrFirstName;
 	private String[] arrLastName;
@@ -88,16 +96,16 @@ public class ThymeActivity extends Activity {
 		
 		mLocationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 		httpHandler = new Handler();
-		mLocHandler = new Handler() {
-            @Override
-			public void handleMessage(Message msg) {
-                switch (msg.what) {
-                    case UPDATE_LOCATION:
-                    	tvLocation.setText((String) msg.obj);
-                        break;
-                }
-            }
-        };
+//		mLocHandler = new Handler() {
+//            @Override
+//			public void handleMessage(Message msg) {
+//                switch (msg.what) {
+//                    case UPDATE_LOCATION:
+//                    	tvLocation.setText((String) msg.obj);
+//                        break;
+//                }
+//            }
+//        };
         
         listItem = new ArrayList<HashMap<String, Object>>();
         listItemAdapter = new SimpleAdapter(this,
@@ -126,22 +134,11 @@ public class ThymeActivity extends Activity {
 	@Override
 	public void onStart() {
 		super.onStart();
-		
 		initLocationTrack();
-		new GeocodeTask().execute(mock);
-		new AsyncListTask().execute();
-//		new AsyncTask<Void, Void, Void>() {
-//			@Override
-//			protected Void doInBackground(Void... params) {
-//				try {
-//					postData();
-//				} catch (JSONException je) {
-//					Log.d(TAG, "post data error");
-//					je.printStackTrace();
-//				}
-//				return null;
-//			}
-//		}.execute();
+//		new GeocodeTask().execute(mock);
+		new HttpRequestTask().execute();
+//		new AsyncListTask().execute();
+
 		
 		
 //		Geocoder geo = new Geocoder(this);
@@ -168,15 +165,16 @@ public class ThymeActivity extends Activity {
 	 * Find all the view widgets necessary for your UI
 	 */
 	private void findViews() {
-    	tvLocation = (TextView) findViewById(R.id.gpsInfo);
-    	tvMock = (TextView) findViewById(R.id.mockInfo);
+//    	tvLocation = (TextView) findViewById(R.id.gpsInfo);
+//    	tvMock = (TextView) findViewById(R.id.mockInfo);
 //    	tvResponse = (TextView) findViewById(R.id.test);
     	tvLoading = (TextView) findViewById(R.id.loading);
     	lvContacts = (ListView) findViewById(R.id.list_contacts);
+    	mProgress = (ProgressBar) findViewById(R.id.pb_gps);
     }
 	
 	// Get data from Zoho Creator report
-	private void postData() throws JSONException {
+	private JSONObject postData() throws JSONException {
 //		HttpClient httpclient = HttpClientBuilder.create().build();
 		HttpClient httpclient = new DefaultHttpClient();
 		
@@ -184,6 +182,8 @@ public class ThymeActivity extends Activity {
 //		httpget.getParams().setParameter("authtoken", MURSHAW_TOKEN);
 //		httpget.getParams().setParameter("scope", "creatorapi");
 //		httpget.getParams().setParameter("raw", "true");
+		
+		JSONObject json = null;
 		
 		try {
 			HttpResponse response = httpclient.execute(httpget);
@@ -208,28 +208,29 @@ public class ThymeActivity extends Activity {
 						e.printStackTrace();
 					}
 				}
-				final String responseString = sb.toString();
+				String responseString = sb.toString();
 //				httpHandler.post(new Runnable() {
 //					@Override
 //					public void run() {
 //						tvResponse.setText(responseString);
 //					}
 //				});
-				JSONObject json = new JSONObject(responseString);
-				String s = json.getJSONArray("Sirius").toString();
-				Log.i("S DATA", s);
-				JSONTokener jsonToken = new JSONTokener(s);
-				Object obj;
-				while (jsonToken.more()) {
-					obj = jsonToken.nextValue();
-					Log.i("DATA", obj.toString());
-					if (obj instanceof JSONArray) {
-						JSONArray result = (JSONArray) obj;
-						parseJSON(result);
-					} else {
-						Log.i("DATA", "NOT JSON Array!");
-					}
-				}
+				
+				json = new JSONObject(responseString);
+//				String s = json.getJSONArray("Sirius").toString();
+//				Log.i("S DATA", s);
+//				JSONTokener jsonToken = new JSONTokener(s);
+//				Object obj;
+//				while (jsonToken.more()) {
+//					obj = jsonToken.nextValue();
+//					Log.i("DATA", obj.toString());
+//					if (obj instanceof JSONArray) {
+//						JSONArray result = (JSONArray) obj;
+//						parseJSON(result);
+//					} else {
+//						Log.i("DATA", "NOT JSON Array!");
+//					}
+//				}
 			}
 		} catch (ClientProtocolException e) {
 			Log.e(TAG, "Client Protocol Exception:");
@@ -238,16 +239,8 @@ public class ThymeActivity extends Activity {
 			Log.e(TAG, "IO Exception:");
 			e.printStackTrace();
 		}
-	}
-
-	// Haversine formula to calculate distances between 2 locations given lat/long coordinates
-	private double haversine(double lat1, double lng1, double lat2, double lng2) {
-		// Radius of Earth: 6371km
-		lat1 = Math.toRadians(lat1);
-		lng1 = Math.toRadians(lng1);
-		lat2 = Math.toRadians(lat2);
-		lng2 = Math.toRadians(lng2);
-		return 2 * 6371 * Math.asin(Math.sqrt(Math.pow(Math.sin((lat2 - lat1)/2), 2) + Math.cos(lat1) * Math.cos(lat2) * Math.pow(Math.sin((lng2 - lng1)/2), 2)));
+		
+		return json;
 	}
 	
 	private void parseJSON(JSONArray ja) {
@@ -273,6 +266,43 @@ public class ThymeActivity extends Activity {
     	}
 	}
 	
+	private ArrayList<String> parseAddress(JSONObject json) {
+		ArrayList<String> add = new ArrayList<String>();
+		try {
+			JSONTokener token = new JSONTokener(json.getJSONArray("Sirius").toString());
+			while (token.more()) {
+				Object obj = token.nextValue();
+				if (obj instanceof JSONArray) {
+					queryLength = ((JSONArray) obj).length();
+					for (int i=0; i < queryLength; i++) {
+						add.add(((JSONArray) obj).getJSONObject(i).getString("Address")
+		    					+ " "
+		    					+ ((JSONArray) obj).getJSONObject(i).getString("City")
+		    					+ " "
+		    					+ ((JSONArray) obj).getJSONObject(i).getString("State1")
+		    					+ " "
+		    					+ ((JSONArray) obj).getJSONObject(i).getString("Zip"));
+					}
+				}
+			}
+		} catch (JSONException je) {
+    		Log.e(TAG, "Parse JSON Error:");
+    		je.printStackTrace();
+    	}
+		
+		return add;
+	}
+	
+	// Haversine formula to calculate distances between 2 locations given lat/long coordinates
+	private double haversine(double lat1, double lng1, double lat2, double lng2) {
+		// Radius of Earth: 6371km
+		lat1 = Math.toRadians(lat1);
+		lng1 = Math.toRadians(lng1);
+		lat2 = Math.toRadians(lat2);
+		lng2 = Math.toRadians(lng2);
+		return 2 * 6371 * Math.asin(Math.sqrt(Math.pow(Math.sin((lat2 - lat1)/2), 2) + Math.cos(lat1) * Math.cos(lat2) * Math.pow(Math.sin((lng2 - lng1)/2), 2)));
+	}
+	
 	private void initLocationTrack() {
 		Location gpsLocation = null;
 		Location networkLocation = null;
@@ -296,9 +326,11 @@ public class ThymeActivity extends Activity {
 	private void updateUILocation(Location location) {
     	// We're sending the update to a handler which then updates the UI with the new
     	// location.
-    	Message.obtain(mLocHandler,
-    			UPDATE_LOCATION,
-    			"Latitude: " + location.getLatitude() + "\nLongitude: " + location.getLongitude()).sendToTarget();
+		mLat = location.getLatitude();
+		mLng = location.getLongitude();
+//    	Message.obtain(mLocHandler,
+//    			UPDATE_LOCATION,
+//    			"Latitude: " + mLat + "\nLongitude: " + mLng).sendToTarget();
     }
 	
 	/** Determines whether one Location reading is better than the current Location fix.
@@ -390,13 +422,51 @@ public class ThymeActivity extends Activity {
         }
     };
     
+    private class HttpRequestTask extends AsyncTask<Void, Void, Void> {
+
+		@Override
+		protected Void doInBackground(Void... params) {
+			try {
+    			mJson = postData();
+//    			addresses = parseAddress(json);
+//    			Log.i(TAG, "Addresses: " + addresses.toString());
+    		} catch (JSONException e) {
+    			Log.e(TAG, "JSON Exception Error:");
+    			e.printStackTrace();
+    		}
+			
+			return null;
+		}
+    	
+		@Override
+		protected void onPostExecute(Void unused) {
+			new GeocodeTask().execute();
+		}
+    }
+    
     // AsyncTask pulling contact information
     private class AsyncListTask extends AsyncTask<Void, HashMap<String, Object>, Void> {
 
 		@Override
 		protected Void doInBackground(Void... unused) {
 			try {
-    			postData();
+				JSONObject json = postData();
+				if (json != null) {
+					JSONTokener token = new JSONTokener(json.getJSONArray("Sirius").toString());
+					Object obj;
+					while (token.more()) {
+						obj = token.nextValue();
+//						Log.i("DATA", obj.toString());
+						if (obj instanceof JSONArray) {
+							JSONArray result = (JSONArray) obj;
+							parseJSON(result);
+						} else {
+							Log.i("DATA", "NOT JSON Array!");
+						}
+					}
+				} else {
+					// Some manner of server error since there was no response
+				}
     		} catch (JSONException e) {
     			Log.e(TAG, "JSON Exception Error:");
     			e.printStackTrace();
@@ -478,32 +548,88 @@ public class ThymeActivity extends Activity {
     }
     
     // AsyncTask for geocoding site addresses
-    private class GeocodeTask extends AsyncTask<String, Void, Void> {
+    private class GeocodeTask extends AsyncTask<Void, Void, Void> {
 
 		@Override
-		protected Void doInBackground(String... address) {
+		protected Void doInBackground(Void... unused) {
 			gc = new Geocoder(context);
+			tree = new TreeMap<Double, HashMap<String, Object>>();
 			try {
 				if (Geocoder.isPresent()) {
-					List<Address> place = gc.getFromLocationName(address[0], 1);
-					
-					Address a = place.get(0);
-					
-					lat = a.getLatitude();
-					lng = a.getLongitude();
+					JSONTokener token = new JSONTokener(mJson.getJSONArray("Sirius").toString());
+					while (token.more()) {
+						Object obj = token.nextValue();
+						if (obj instanceof JSONArray) {
+							JSONArray ja = (JSONArray) obj;
+							queryLength = ja.length();
+							for (int i=0; i < queryLength; i++) {
+								String address = ja.getJSONObject(i).getString("Address")
+												+ " "
+												+ ja.getJSONObject(i).getString("City")
+												+ " "
+												+ ja.getJSONObject(i).getString("State1")
+												+ " "
+												+ ja.getJSONObject(i).getString("Zip");
+								
+								List<Address> place = gc.getFromLocationName(address, 1);
+								Address a = place.get(0);
+								
+								HashMap<String, Object> hmap = new HashMap<String, Object>();
+								hmap.put("ItemFirstName", ja.getJSONObject(i).getString("First_Name"));
+								hmap.put("ItemLastName", ja.getJSONObject(i).getString("Last_Name"));
+								hmap.put("ItemEmail", ja.getJSONObject(i).getString("Email"));
+								hmap.put("ItemSite", ja.getJSONObject(i).getString("Location"));
+								hmap.put("ItemNumber", ja.getJSONObject(i).getString("Telephone"));
+								tree.put(haversine(mLat, mLng, a.getLatitude(), a.getLongitude()), hmap);
+							}
+						}
+					}
 				} else {
 					Log.d(TAG, "Geocoder not present");
 				}
 			} catch (IOException e) {
 				Log.d(TAG, "IOException with GeocodeTask");
 				e.printStackTrace();
-			}
+			} catch (JSONException je) {
+	    		Log.e(TAG, "Parse JSON Error:");
+	    		je.printStackTrace();
+	    	}
 			return null;
 		}
     	
 		@Override
 		protected void onPostExecute(Void unused) {
-			tvMock.setText("Latitude: " + lat + "\nLongitude: " + lng);
+//			tvMock.setText("Latitude: " + mLat + "\nLongitude: " + mLng);
+//			Log.i(TAG + ".TREE", tree.toString());
+			
+			tvLoading.setVisibility(View.GONE);
+			mProgress.setVisibility(View.GONE);
+			
+			for (Double d : tree.keySet()) {
+				listItem.add(tree.get(d));
+			}
+			listItemAdapter.setViewBinder(new ViewBinder() {    
+	            
+	            @Override
+				public boolean setViewValue(View view, Object data, String textRepresentation) {    
+	                if (view instanceof ImageView  && data instanceof Bitmap) {    
+	                    ImageView iv = (ImageView) view;
+	                    iv.setImageBitmap((Bitmap) data);    
+	                    return true;    
+	                } else {
+	                	return false;
+	                }
+	            }    
+	        });
+			listItemAdapter.notifyDataSetChanged();
+
+			lvContacts.setOnItemClickListener(new OnItemClickListener() {
+				@Override
+				public void onItemClick(AdapterView<?> arg0, View arg1, int position, final long id) {
+					HashMap<String, Object> itemAtPosition = listItem.get(position);
+					Toast.makeText(context, itemAtPosition.get("ItemNumber").toString(), Toast.LENGTH_SHORT).show();
+				}
+			});
 		}
     }
 }
