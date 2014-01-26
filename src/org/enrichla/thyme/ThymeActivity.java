@@ -53,6 +53,7 @@ public class ThymeActivity extends Activity {
     private static final int TEN_METERS = 10;
 	private static final int TWO_MINUTES = 1000 * 60 * 2;
 	
+	private static final String TOKEN = "925a3531d67c8358bbe1903c4649af1a";
 	private static final String MURSHAW_TOKEN = "cedbc4971aed515dc6d665f95f89e095";
 	private static final String mock = "5237 Rosemead Blvd, San Gabriel, CA";
 //	private static final String mocks[] = {"fox", "dog", "cat"};
@@ -178,10 +179,17 @@ public class ThymeActivity extends Activity {
 //		HttpClient httpclient = HttpClientBuilder.create().build();
 		HttpClient httpclient = new DefaultHttpClient();
 		
-		HttpGet httpget = new HttpGet("https://creator.zoho.com/api/json/blacky/view/Sirius_Report?authtoken=cedbc4971aed515dc6d665f95f89e095&scope=creatorapi&raw=true");
+//		HttpGet httpget = new HttpGet("https://creator.zoho.com/api/json/blacky/view/Sirius_Report?authtoken=cedbc4971aed515dc6d665f95f89e095&scope=creatorapi&raw=true");
+//		HttpGet httpget = new HttpGet("https://creator.zoho.com/api/json/blacky/view/Sirius_Report");
 //		httpget.getParams().setParameter("authtoken", MURSHAW_TOKEN);
 //		httpget.getParams().setParameter("scope", "creatorapi");
 //		httpget.getParams().setParameter("raw", "true");
+		String zview = "Humans";
+		String uri = "https://creator.zoho.com/api/json/thyme/view/" + zview + "?" +
+						"authtoken=" + TOKEN +
+						"&scope=creatorapi&raw = true";
+		
+		HttpGet httpget = new HttpGet(uri);
 		
 		JSONObject json = null;
 		
@@ -216,6 +224,7 @@ public class ThymeActivity extends Activity {
 //					}
 //				});
 				
+//				Log.d("Response", responseString);
 				json = new JSONObject(responseString);
 //				String s = json.getJSONArray("Sirius").toString();
 //				Log.i("S DATA", s);

@@ -38,6 +38,8 @@ public class ThymeContacts extends Activity {
 	
 	private static final String TAG = "ThymeContacts";
 	
+	private static final String TOKEN = "925a3531d67c8358bbe1903c4649af1a";
+	
 	private Context context;
 	
 	private TextView tvLoading;
@@ -106,10 +108,15 @@ public class ThymeContacts extends Activity {
 //			HttpClient httpclient = HttpClientBuilder.create().build();
 		HttpClient httpclient = new DefaultHttpClient();
 		
-		HttpGet httpget = new HttpGet("https://creator.zoho.com/api/json/blacky/view/Sirius_Report?authtoken=cedbc4971aed515dc6d665f95f89e095&scope=creatorapi&raw=true");
+//		HttpGet httpget = new HttpGet("https://creator.zoho.com/api/json/blacky/view/Sirius_Report?authtoken=cedbc4971aed515dc6d665f95f89e095&scope=creatorapi&raw=true");
 //			httpget.getParams().setParameter("authtoken", MURSHAW_TOKEN);
 //			httpget.getParams().setParameter("scope", "creatorapi");
 //			httpget.getParams().setParameter("raw", "true");
+		String zview = "Humans";
+		String uri = "https://creator.zoho.com/api/json/thyme/view/" + zview + "?" +
+						"authtoken=" + TOKEN +
+						"&scope=creatorapi&raw=true";
+		HttpGet httpget = new HttpGet(uri);
 		
 		JSONObject json = null;
 		
@@ -185,9 +192,10 @@ public class ThymeContacts extends Activity {
     			arrFirstName[i] = ja.getJSONObject(i).getString("First_Name");
     			arrLastName[i] = ja.getJSONObject(i).getString("Last_Name");
     			arrEmail[i] = ja.getJSONObject(i).getString("Email");
-    			arrSite[i] = ja.getJSONObject(i).getString("Location");
+    			arrSite[i] = ja.getJSONObject(i).getString("Site");
 //    			arrNumber[i] = ja.getJSONObject(i).getInt("Telephone");
-    			arrNumber[i] = ja.getJSONObject(i).getString("Telephone");
+//    			arrNumber[i] = ja.getJSONObject(i).getString("Telephone");
+    			arrNumber[i] = "2135551234";
     		}
     	} catch (JSONException je) {
     		Log.e(TAG, "Parse JSON Error:");
@@ -203,7 +211,8 @@ public class ThymeContacts extends Activity {
 			try {
     			JSONObject json = postData();
     			if (json != null) {
-					JSONTokener token = new JSONTokener(json.getJSONArray("Sirius").toString());
+    				String resultKey = "Human";
+					JSONTokener token = new JSONTokener(json.getJSONArray(resultKey).toString());
 					Object obj;
 					while (token.more()) {
 						obj = token.nextValue();
