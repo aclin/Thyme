@@ -9,9 +9,18 @@
     tools:context=".OpenActivity" >
 
     <Button
+        android:id="@+id/btnUpdate"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="Update"
+        android:textColor="#FFFFFF"
+        android:background="#7777FF" />
+    
+    <Button
         android:id="@+id/btnContacts"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_below="@id/btnUpdate"
         android:text="List Contacts" />
     
     <Button
