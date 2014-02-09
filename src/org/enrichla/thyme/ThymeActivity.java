@@ -187,7 +187,7 @@ public class ThymeActivity extends Activity {
 		String zview = "Humans";
 		String uri = "https://creator.zoho.com/api/json/thyme/view/" + zview + "?" +
 						"authtoken=" + TOKEN +
-						"&scope=creatorapi&raw = true";
+						"&scope=creatorapi&raw=true";
 		
 		HttpGet httpget = new HttpGet(uri);
 		

@@ -23,25 +23,39 @@ import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.SimpleAdapter.ViewBinder;
 import android.widget.TextView;
+import android.widget.TextView.OnEditorActionListener;
 import android.widget.Toast;
 
-public class ThymeContacts extends Activity {
+public class ThymeContacts extends Activity implements View.OnClickListener {
 	
 	private static final String TAG = "ThymeContacts";
 	
 	private static final String TOKEN = "925a3531d67c8358bbe1903c4649af1a";
 	
+	private static final String EQUALS = "%3D";
+	private static final String QUOTE = "%22";
+	private static final String OR = "%7C%7C";
+	private static final String AND = "%26%26";
+	private static final String OP_CONTAINS = "26";
+	
 	private Context context;
 	
+	private EditText etSearchFirstName;
+	private EditText etSearchLastName;
+	private Button btnSearch;
 	private TextView tvLoading;
 	
 	private ListView lvContacts;
@@ -56,6 +70,9 @@ public class ThymeContacts extends Activity {
 //	private int[] arrNumber;
 	private String[] arrNumber;
 	
+	private String queryFName;
+	private String queryLName;
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -63,6 +80,7 @@ public class ThymeContacts extends Activity {
 		
 		this.context = this;
 		findViews();
+		setListeners();
 		
 		listItem = new ArrayList<HashMap<String, Object>>();
         listItemAdapter = new SimpleAdapter(this,
@@ -92,7 +110,7 @@ public class ThymeContacts extends Activity {
 	public void onStart() {
 		super.onStart();
 		
-		new AsyncListTask().execute();
+		//new AsyncListTask().execute();
 	}
 	
 	/**
@@ -100,8 +118,77 @@ public class ThymeContacts extends Activity {
 	 */
 	private void findViews() {
     	tvLoading = (TextView) findViewById(R.id.contacts_loading);
+    	etSearchFirstName = (EditText) findViewById(R.id.etSearchFirstName);
+    	etSearchLastName = (EditText) findViewById(R.id.etSearchLastName);
+    	btnSearch = (Button) findViewById(R.id.btnSearch);
     	lvContacts = (ListView) findViewById(R.id.list_contacts);
+    	
+    	etSearchFirstName.setOnEditorActionListener(new OnEditorActionListener() {
+    	    @Override
+    	    public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+    	        boolean handled = false;
+    	        if (actionId == EditorInfo.IME_ACTION_SEARCH) {
+    	        	doSearch();
+    	            handled = true;
+    	        }
+    	        return handled;
+    	    }
+    	});
+    	
+    	etSearchLastName.setOnEditorActionListener(new OnEditorActionListener() {
+    	    @Override
+    	    public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+    	        boolean handled = false;
+    	        if (actionId == EditorInfo.IME_ACTION_SEARCH) {
+    	        	doSearch();
+    	            handled = true;
+    	        }
+    	        return handled;
+    	    }
+    	});
     }
+	
+	private void setListeners() {
+		btnSearch.setOnClickListener(this);
+	}
+	
+	@Override
+	public void onClick(View v) {
+		switch (v.getId()) {
+		case R.id.btnSearch:
+			doSearch();
+			break;
+		}
+	}
+	
+	public void doSearch() {
+//		String[] queryFirstName = etSearchFirstName.getText().toString().split(" ");
+//		String[] queryLastName = etSearchLastName.getText().toString().split(" ");
+//		Log.i(TAG, "etSearchFirstName: " + etSearchFirstName.getText().toString());
+//		Log.i(TAG, "etSearchLastName: " + etSearchFirstName.getText().toString());
+//		Log.i(TAG, "queryFirstName: "+ queryFirstName[0]);
+//		Log.i(TAG, "queryLastName: "+ queryLastName[0]);
+//		if (queryFirstName.length == 0) {
+//			
+//		}
+		listItem.clear();
+		
+		queryFName = etSearchFirstName.getText().toString().trim();
+		queryLName = etSearchLastName.getText().toString().trim();
+		
+		String tmp = queryFName.replaceAll("\\s+", "");
+		if (tmp.isEmpty())
+			queryFName = tmp;
+		
+		tmp = queryLName.replaceAll("\\s+", "");
+		if (tmp.isEmpty())
+			queryLName = tmp;
+		
+		Log.i(TAG, "queryFName: "+ queryFName);
+		Log.i(TAG, "queryLName: "+ queryLName);
+		
+		new AsyncListTask().execute();
+	}
 	
 	// Get data from Zoho Creator report
 	private JSONObject postData() throws JSONException {
@@ -109,13 +196,35 @@ public class ThymeContacts extends Activity {
 		HttpClient httpclient = new DefaultHttpClient();
 		
 //		HttpGet httpget = new HttpGet("https://creator.zoho.com/api/json/blacky/view/Sirius_Report?authtoken=cedbc4971aed515dc6d665f95f89e095&scope=creatorapi&raw=true");
-//			httpget.getParams().setParameter("authtoken", MURSHAW_TOKEN);
-//			httpget.getParams().setParameter("scope", "creatorapi");
-//			httpget.getParams().setParameter("raw", "true");
+//		HttpGet httpget = new HttpGet("https://creator.zoho.com/api/json/thyme/view/humans");
+//		httpget.getParams().setParameter("authtoken", TOKEN);
+//		httpget.getParams().setParameter("scope", "creatorapi");
+//		httpget.getParams().setParameter("raw", "true");
 		String zview = "Humans";
 		String uri = "https://creator.zoho.com/api/json/thyme/view/" + zview + "?" +
 						"authtoken=" + TOKEN +
 						"&scope=creatorapi&raw=true";
+		if (!queryFName.isEmpty()) {
+			uri += "&First_Name=" + queryFName + "&First_Name_op=" + OP_CONTAINS;
+		}
+		if (!queryLName.isEmpty()) {
+			uri += "&Last_Name=" + queryLName + "&Last_Name_op=" + OP_CONTAINS;
+		}
+		
+		/*for (int i = 0; i < query.length-1; i++) {
+			uri += "First_Name" + EQUALS +
+					QUOTE + query[i] + QUOTE +
+					OR +
+					"Last_Name" + EQUALS 
+					+ QUOTE + query[i] + QUOTE + OR;
+		}
+		uri += "First_Name" + EQUALS +
+				QUOTE + query[query.length-1] + QUOTE +
+				OR +
+				"Last_Name" + EQUALS +
+				QUOTE + query[query.length-1] + QUOTE + ")";*/
+		
+		Log.i(TAG, uri);
 		HttpGet httpget = new HttpGet(uri);
 		
 		JSONObject json = null;
@@ -306,5 +415,4 @@ public class ThymeContacts extends Activity {
 			tvLoading.setVisibility(View.GONE);
 		}
     }
-
 }
