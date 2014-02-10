@@ -9,25 +9,30 @@
     tools:context=".OpenActivity" >
 
     <Button
-        android:id="@+id/btnUpdate"
-        android:layout_width="fill_parent"
+        android:id="@+id/btnFindMe"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Update"
-        android:textColor="#FFFFFF"
-        android:background="#7777FF" />
+        android:text="Locate me by GPS" />
     
     <Button
         android:id="@+id/btnContacts"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@id/btnUpdate"
-        android:text="List Contacts" />
+        android:layout_below="@id/btnFindMe"
+        android:text="Search by name" />
     
     <Button
-        android:id="@+id/btnFindMe"
+        android:id="@+id/btnRoles"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/btnContacts"
-        android:text="Locate me by GPS" />
+        android:text="Search by role" />
+    
+    <Button
+        android:id="@+id/btnGroups"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/btnRoles"
+        android:text="Search by group" />
 
 </RelativeLayout>

@@ -9,58 +9,18 @@
     tools:context=".ThymeContacts" >
 
     <LinearLayout
-        android:id="@+id/SearchLinearLayout1"
+        android:id="@+id/llSearchCriteria"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
+        android:orientation="vertical"
 	    android:layout_alignParentTop="true" >
-        
-        <TextView
-            android:id="@+id/tvSearchFirstName"
-	        android:layout_width="wrap_content"
-	        android:layout_height="wrap_content"
-	        android:text="First Name: "/>
-        
-	    <EditText
-	        android:id="@+id/etSearchFirstName"
-	        android:layout_width="0dip"
-	        android:layout_height="wrap_content"
-	        android:inputType="text"
-	        android:imeOptions="actionSearch"
-	        android:layout_weight="1" >
-	        <requestFocus />
-	    </EditText>
-	    
-    </LinearLayout>
-    <LinearLayout
-        android:id="@+id/SearchLinearLayout2"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_below="@id/SearchLinearLayout1" >
-        
-        <TextView
-            android:id="@+id/tvSearchLastName"
-	        android:layout_width="wrap_content"
-	        android:layout_height="wrap_content"
-	        android:text="Last Name: "/>
-        
-	    <EditText
-	        android:id="@+id/etSearchLastName"
-	        android:layout_width="0dip"
-	        android:layout_height="wrap_content"
-	        android:inputType="text"
-	        android:imeOptions="actionSearch"
-	        android:layout_weight="1" >
-	    </EditText>
-	    
     </LinearLayout>
     
     <Button 
         android:id="@+id/btnSearch"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@id/SearchLinearLayout2"
+        android:layout_below="@id/llSearchCriteria"
         android:text="Search"/>
     
     <TextView

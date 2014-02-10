@@ -1,5 +1,7 @@
 package org.enrichla.thyme;
 
+import org.enrichla.thyme.ThymeContacts.Criteria;
+
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
@@ -9,7 +11,7 @@ import android.widget.Button;
 
 public class OpenActivity extends Activity implements View.OnClickListener {
 	
-	Button btnContacts, btnFindGPS;
+	Button btnContacts, btnRoles, btnFindGPS;
 	Intent iContacts, iFindGPS;
 	
 	
@@ -31,19 +33,30 @@ public class OpenActivity extends Activity implements View.OnClickListener {
 	
 	private void findViews() {
 		btnContacts = (Button) findViewById(R.id.btnContacts);
+		btnRoles = (Button) findViewById(R.id.btnRoles);
 		btnFindGPS = (Button) findViewById(R.id.btnFindMe);
 	}
 	
 	private void setListeners() {
 		btnContacts.setOnClickListener(this);
+		btnRoles.setOnClickListener(this);
 		btnFindGPS.setOnClickListener(this);
 	}
 	
 	@Override
 	public void onClick(View v) {
+		Bundle bData = new Bundle();
 		switch (v.getId()) {
 		case R.id.btnContacts:
 			iContacts = new Intent().setClass(this, ThymeContacts.class);
+			bData.putSerializable("criteria", Criteria.NAMES);
+			iContacts.putExtras(bData);
+			startActivity(iContacts);
+			break;
+		case R.id.btnRoles:
+			iContacts = new Intent().setClass(this, ThymeContacts.class);
+			bData.putSerializable("criteria", Criteria.ROLES);
+			iContacts.putExtras(bData);
 			startActivity(iContacts);
 			break;
 		case R.id.btnFindMe:

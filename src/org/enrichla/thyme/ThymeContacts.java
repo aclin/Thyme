@@ -32,6 +32,7 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.SimpleAdapter.ViewBinder;
@@ -39,7 +40,7 @@ import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 import android.widget.Toast;
 
-public class ThymeContacts extends Activity implements View.OnClickListener {
+public class ThymeContacts extends Activity implements View.OnClickListener, TextView.OnEditorActionListener {
 	
 	private static final String TAG = "ThymeContacts";
 	
@@ -49,14 +50,35 @@ public class ThymeContacts extends Activity implements View.OnClickListener {
 	private static final String QUOTE = "%22";
 	private static final String OR = "%7C%7C";
 	private static final String AND = "%26%26";
+	
 	private static final String OP_CONTAINS = "26";
+	private static final String OP_STARTS_WITH = "24";
+	
+	public enum Criteria {
+		NAMES(""), ROLES("Role"), GROUPS("Group");
+		
+		private String name;
+		
+		private Criteria(String c) {
+			this.name = c;
+		}
+		
+		public String getName() {
+			return this.name;
+		}
+	};
 	
 	private Context context;
 	
-	private EditText etSearchFirstName;
-	private EditText etSearchLastName;
+	public Criteria mCriteria;
+	
 	private Button btnSearch;
 	private TextView tvLoading;
+	private LinearLayout llSearch;
+	private EditText etSearchFirstName;
+	private EditText etSearchLastName;
+	private EditText etSearchCriteria;
+	private TextView tvCriteria;
 	
 	private ListView lvContacts;
 	private ArrayList<HashMap<String, Object>> listItem;
@@ -72,6 +94,7 @@ public class ThymeContacts extends Activity implements View.OnClickListener {
 	
 	private String queryFName;
 	private String queryLName;
+	private String query;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -80,7 +103,27 @@ public class ThymeContacts extends Activity implements View.OnClickListener {
 		
 		this.context = this;
 		findViews();
-		setListeners();
+    	setListeners();
+		
+		Bundle bData = this.getIntent().getExtras();
+		mCriteria = (Criteria) bData.getSerializable("criteria");
+		
+		switch (mCriteria) {
+		case NAMES:
+			llSearch.addView(getLayoutInflater().inflate(R.layout.linearlayout_search_name, null));
+			etSearchFirstName = (EditText) findViewById(R.id.etSearchFirstName);
+	    	etSearchLastName = (EditText) findViewById(R.id.etSearchLastName);
+			etSearchFirstName.setOnEditorActionListener(this);
+			etSearchLastName.setOnEditorActionListener(this);
+			break;
+		default:
+			llSearch.addView(getLayoutInflater().inflate(R.layout.linearlayout_search_other, null));
+			etSearchCriteria = (EditText) findViewById(R.id.etSearchCriteria);
+			etSearchCriteria.setOnEditorActionListener(this);
+			tvCriteria = (TextView) findViewById(R.id.tvSearchCriteria);
+			tvCriteria.setText(mCriteria.getName());
+			break;
+		}
 		
 		listItem = new ArrayList<HashMap<String, Object>>();
         listItemAdapter = new SimpleAdapter(this,
@@ -118,34 +161,33 @@ public class ThymeContacts extends Activity implements View.OnClickListener {
 	 */
 	private void findViews() {
     	tvLoading = (TextView) findViewById(R.id.contacts_loading);
-    	etSearchFirstName = (EditText) findViewById(R.id.etSearchFirstName);
-    	etSearchLastName = (EditText) findViewById(R.id.etSearchLastName);
     	btnSearch = (Button) findViewById(R.id.btnSearch);
     	lvContacts = (ListView) findViewById(R.id.list_contacts);
+    	llSearch = (LinearLayout) findViewById(R.id.llSearchCriteria);
     	
-    	etSearchFirstName.setOnEditorActionListener(new OnEditorActionListener() {
-    	    @Override
-    	    public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-    	        boolean handled = false;
-    	        if (actionId == EditorInfo.IME_ACTION_SEARCH) {
-    	        	doSearch();
-    	            handled = true;
-    	        }
-    	        return handled;
-    	    }
-    	});
-    	
-    	etSearchLastName.setOnEditorActionListener(new OnEditorActionListener() {
-    	    @Override
-    	    public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-    	        boolean handled = false;
-    	        if (actionId == EditorInfo.IME_ACTION_SEARCH) {
-    	        	doSearch();
-    	            handled = true;
-    	        }
-    	        return handled;
-    	    }
-    	});
+//    	etSearchFirstName.setOnEditorActionListener(new OnEditorActionListener() {
+//    	    @Override
+//    	    public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+//    	        boolean handled = false;
+//    	        if (actionId == EditorInfo.IME_ACTION_SEARCH) {
+//    	        	doSearch();
+//    	            handled = true;
+//    	        }
+//    	        return handled;
+//    	    }
+//    	});
+//    	
+//    	etSearchLastName.setOnEditorActionListener(new OnEditorActionListener() {
+//    	    @Override
+//    	    public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+//    	        boolean handled = false;
+//    	        if (actionId == EditorInfo.IME_ACTION_SEARCH) {
+//    	        	doSearch();
+//    	            handled = true;
+//    	        }
+//    	        return handled;
+//    	    }
+//    	});
     }
 	
 	private void setListeners() {
@@ -161,6 +203,16 @@ public class ThymeContacts extends Activity implements View.OnClickListener {
 		}
 	}
 	
+	@Override
+	public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+		boolean handled = false;
+		if (actionId == EditorInfo.IME_ACTION_SEARCH) {
+			doSearch();
+			handled = true;
+		}
+		return handled;
+	}
+	
 	public void doSearch() {
 //		String[] queryFirstName = etSearchFirstName.getText().toString().split(" ");
 //		String[] queryLastName = etSearchLastName.getText().toString().split(" ");
@@ -173,19 +225,33 @@ public class ThymeContacts extends Activity implements View.OnClickListener {
 //		}
 		listItem.clear();
 		
-		queryFName = etSearchFirstName.getText().toString().trim();
-		queryLName = etSearchLastName.getText().toString().trim();
-		
-		String tmp = queryFName.replaceAll("\\s+", "");
-		if (tmp.isEmpty())
-			queryFName = tmp;
-		
-		tmp = queryLName.replaceAll("\\s+", "");
-		if (tmp.isEmpty())
-			queryLName = tmp;
-		
-		Log.i(TAG, "queryFName: "+ queryFName);
-		Log.i(TAG, "queryLName: "+ queryLName);
+		String tmp;
+		switch (mCriteria) {
+		case NAMES:
+			queryFName = etSearchFirstName.getText().toString().trim();
+			queryLName = etSearchLastName.getText().toString().trim();
+			
+			tmp = queryFName.replaceAll("\\s+", "");
+			if (tmp.isEmpty())
+				queryFName = tmp;
+			
+			tmp = queryLName.replaceAll("\\s+", "");
+			if (tmp.isEmpty())
+				queryLName = tmp;
+			
+			Log.i(TAG, "queryFName: "+ queryFName);
+			Log.i(TAG, "queryLName: "+ queryLName);
+			break;
+		default:
+			query = etSearchCriteria.getText().toString().trim();
+			
+			tmp = query.replaceAll("\\s+", "");
+			if (tmp.isEmpty())
+				query = tmp;
+			
+			Log.i(TAG, "query: " + query);
+			break;
+		}
 		
 		new AsyncListTask().execute();
 	}
@@ -200,15 +266,26 @@ public class ThymeContacts extends Activity implements View.OnClickListener {
 //		httpget.getParams().setParameter("authtoken", TOKEN);
 //		httpget.getParams().setParameter("scope", "creatorapi");
 //		httpget.getParams().setParameter("raw", "true");
+		
 		String zview = "Humans";
+		
 		String uri = "https://creator.zoho.com/api/json/thyme/view/" + zview + "?" +
 						"authtoken=" + TOKEN +
 						"&scope=creatorapi&raw=true";
-		if (!queryFName.isEmpty()) {
-			uri += "&First_Name=" + queryFName + "&First_Name_op=" + OP_CONTAINS;
-		}
-		if (!queryLName.isEmpty()) {
-			uri += "&Last_Name=" + queryLName + "&Last_Name_op=" + OP_CONTAINS;
+		
+		switch (mCriteria) {
+		case NAMES:
+			if (!queryFName.isEmpty()) {
+				uri += "&First_Name=" + queryFName + "&First_Name_op=" + OP_STARTS_WITH;
+			}
+			if (!queryLName.isEmpty()) {
+				uri += "&Last_Name=" + queryLName + "&Last_Name_op=" + OP_STARTS_WITH;
+			}
+			break;
+		case ROLES:
+			if (!query.isEmpty())
+				uri += "&Role=" + query + "&Role_op=" + OP_CONTAINS;
+			break;
 		}
 		
 		/*for (int i = 0; i < query.length-1; i++) {
