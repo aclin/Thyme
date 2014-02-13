@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 
 import org.apache.http.HttpResponse;
@@ -12,6 +13,7 @@ import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.enrichla.thyme.util.Entry;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -37,7 +39,6 @@ import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.SimpleAdapter.ViewBinder;
 import android.widget.TextView;
-import android.widget.TextView.OnEditorActionListener;
 import android.widget.Toast;
 
 public class ThymeContacts extends Activity implements View.OnClickListener, TextView.OnEditorActionListener {
@@ -85,6 +86,7 @@ public class ThymeContacts extends Activity implements View.OnClickListener, Tex
 	private SimpleAdapter listItemAdapter;
 	private int queryLength;
 	
+	private ArrayList<Entry> entries;
 	private String[] arrFirstName;
 	private String[] arrLastName;
 	private String[] arrEmail;
@@ -125,6 +127,7 @@ public class ThymeContacts extends Activity implements View.OnClickListener, Tex
 			break;
 		}
 		
+		entries = new ArrayList<Entry>();
 		listItem = new ArrayList<HashMap<String, Object>>();
         listItemAdapter = new SimpleAdapter(this,
         									listItem,
@@ -234,10 +237,14 @@ public class ThymeContacts extends Activity implements View.OnClickListener, Tex
 			tmp = queryFName.replaceAll("\\s+", "");
 			if (tmp.isEmpty())
 				queryFName = tmp;
+			else
+				queryFName = queryFName.replaceAll("\\s+", "+");
 			
 			tmp = queryLName.replaceAll("\\s+", "");
 			if (tmp.isEmpty())
 				queryLName = tmp;
+			else
+				queryLName = queryLName.replaceAll("\\s+", "+");
 			
 			Log.i(TAG, "queryFName: "+ queryFName);
 			Log.i(TAG, "queryLName: "+ queryLName);
@@ -248,6 +255,8 @@ public class ThymeContacts extends Activity implements View.OnClickListener, Tex
 			tmp = query.replaceAll("\\s+", "");
 			if (tmp.isEmpty())
 				query = tmp;
+			else
+				query = query.replaceAll("\\s+", "+");
 			
 			Log.i(TAG, "query: " + query);
 			break;
@@ -285,6 +294,10 @@ public class ThymeContacts extends Activity implements View.OnClickListener, Tex
 		case ROLES:
 			if (!query.isEmpty())
 				uri += "&Role=" + query + "&Role_op=" + OP_CONTAINS;
+			break;
+		case GROUPS:
+			if (!query.isEmpty())
+				uri += "&Group=" + query + "&Group_op=" + OP_CONTAINS;
 			break;
 		}
 		
@@ -375,14 +388,23 @@ public class ThymeContacts extends Activity implements View.OnClickListener, Tex
     	arrNumber = new String[queryLength];
     	try {
     		for (int i=0; i < ja.length(); i++) {
-    			arrFirstName[i] = ja.getJSONObject(i).getString("First_Name");
-    			arrLastName[i] = ja.getJSONObject(i).getString("Last_Name");
-    			arrEmail[i] = ja.getJSONObject(i).getString("Email");
-    			arrSite[i] = ja.getJSONObject(i).getString("Site");
-//    			arrNumber[i] = ja.getJSONObject(i).getInt("Telephone");
-//    			arrNumber[i] = ja.getJSONObject(i).getString("Telephone");
-    			arrNumber[i] = "2135551234";
+    			Entry person = new Entry();
+        		person.fname = ja.getJSONObject(i).getString("First_Name");
+        		person.lname = ja.getJSONObject(i).getString("Last_Name");
+    			person.email = ja.getJSONObject(i).getString("Email");
+    			person.site = ja.getJSONObject(i).getString("Site");
+    			person.number = "2135551234";
+    			entries.add(person);
+    			
+//    			arrFirstName[i] = ja.getJSONObject(i).getString("First_Name");
+//    			arrLastName[i] = ja.getJSONObject(i).getString("Last_Name");
+//    			arrEmail[i] = ja.getJSONObject(i).getString("Email");
+//    			arrSite[i] = ja.getJSONObject(i).getString("Site");
+////    			arrNumber[i] = ja.getJSONObject(i).getInt("Telephone");
+////    			arrNumber[i] = ja.getJSONObject(i).getString("Telephone");
+//    			arrNumber[i] = "2135551234";
     		}
+    		
     	} catch (JSONException je) {
     		Log.e(TAG, "Parse JSON Error:");
     		je.printStackTrace();
@@ -417,14 +439,25 @@ public class ThymeContacts extends Activity implements View.OnClickListener, Tex
     			Log.e(TAG, "JSON Exception Error:");
     			e.printStackTrace();
     		}
-			for (int i = 0; i < queryLength; i++) {
+			Collections.sort(entries, Entry.COMPARE_FNAME);
+//			for (int i = 0; i < queryLength; i++) {
+//				HashMap<String, Object> map = new HashMap<String, Object>();
+//				map.put("ItemFirstName", arrFirstName[i]);
+//				map.put("ItemLastName", arrLastName[i]);
+//				map.put("ItemEmail", arrEmail[i]);
+//				map.put("ItemSite", arrSite[i]);
+//				map.put("ItemNumber", arrNumber[i]);
+//				publishProgress(map);
+//			}
+			for (Entry e : entries) {
 				HashMap<String, Object> map = new HashMap<String, Object>();
-				map.put("ItemFirstName", arrFirstName[i]);
-				map.put("ItemLastName", arrLastName[i]);
-				map.put("ItemEmail", arrEmail[i]);
-				map.put("ItemSite", arrSite[i]);
-				map.put("ItemNumber", arrNumber[i]);
+				map.put("ItemFirstName", e.fname);
+				map.put("ItemLastName", e.lname);
+				map.put("ItemEmail", e.email);
+				map.put("ItemSite", e.site);
+				map.put("ItemNumber", e.number);
 				publishProgress(map);
+				
 			}
 			return null;
 		}
@@ -432,7 +465,7 @@ public class ThymeContacts extends Activity implements View.OnClickListener, Tex
 		@Override
 		protected void onProgressUpdate(HashMap<String, Object>... map) {
 			listItem.add(map[0]);
-			listItemAdapter.setViewBinder(new ViewBinder() {    
+			listItemAdapter.setViewBinder(new ViewBinder() {
 	            
 	            @Override
 				public boolean setViewValue(View view, Object data, String textRepresentation) {    

@@ -11,7 +11,7 @@ import android.widget.Button;
 
 public class OpenActivity extends Activity implements View.OnClickListener {
 	
-	Button btnContacts, btnRoles, btnFindGPS;
+	Button btnContacts, btnRoles, btnGroups, btnFindGPS;
 	Intent iContacts, iFindGPS;
 	
 	
@@ -34,12 +34,14 @@ public class OpenActivity extends Activity implements View.OnClickListener {
 	private void findViews() {
 		btnContacts = (Button) findViewById(R.id.btnContacts);
 		btnRoles = (Button) findViewById(R.id.btnRoles);
+		btnGroups = (Button) findViewById(R.id.btnGroups);
 		btnFindGPS = (Button) findViewById(R.id.btnFindMe);
 	}
 	
 	private void setListeners() {
 		btnContacts.setOnClickListener(this);
 		btnRoles.setOnClickListener(this);
+		btnGroups.setOnClickListener(this);
 		btnFindGPS.setOnClickListener(this);
 	}
 	
@@ -56,6 +58,12 @@ public class OpenActivity extends Activity implements View.OnClickListener {
 		case R.id.btnRoles:
 			iContacts = new Intent().setClass(this, ThymeContacts.class);
 			bData.putSerializable("criteria", Criteria.ROLES);
+			iContacts.putExtras(bData);
+			startActivity(iContacts);
+			break;
+		case R.id.btnGroups:
+			iContacts = new Intent().setClass(this, ThymeContacts.class);
+			bData.putSerializable("criteria", Criteria.GROUPS);
 			iContacts.putExtras(bData);
 			startActivity(iContacts);
 			break;
