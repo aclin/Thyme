@@ -14,6 +14,7 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.enrichla.thyme.util.Entry;
+import org.enrichla.thyme.util.SimpleCustomAdapter;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -83,7 +84,7 @@ public class ThymeContacts extends Activity implements View.OnClickListener, Tex
 	
 	private ListView lvContacts;
 	private ArrayList<HashMap<String, Object>> listItem;
-	private SimpleAdapter listItemAdapter;
+	private SimpleCustomAdapter listItemAdapter;
 	private int queryLength;
 	
 	private ArrayList<Entry> entries;
@@ -129,7 +130,7 @@ public class ThymeContacts extends Activity implements View.OnClickListener, Tex
 		
 		entries = new ArrayList<Entry>();
 		listItem = new ArrayList<HashMap<String, Object>>();
-        listItemAdapter = new SimpleAdapter(this,
+        listItemAdapter = new SimpleCustomAdapter(this,
         									listItem,
         									R.layout.thyme_listview,
         									new String[] {	"ItemFirstName",
@@ -227,6 +228,7 @@ public class ThymeContacts extends Activity implements View.OnClickListener, Tex
 //			
 //		}
 		listItem.clear();
+		entries.clear();
 		
 		String tmp;
 		switch (mCriteria) {
