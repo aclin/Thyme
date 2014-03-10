@@ -12,7 +12,8 @@ import android.widget.Button;
 public class OpenActivity extends Activity implements View.OnClickListener {
 	
 	Button btnContacts, btnRoles, btnGroups, btnFindGPS;
-	Intent iContacts, iFindGPS;
+	Button btnUpdateHumans;
+	Intent iContacts, iFindGPS, iUpdateHumans;
 	
 	
 	@Override
@@ -36,6 +37,7 @@ public class OpenActivity extends Activity implements View.OnClickListener {
 		btnRoles = (Button) findViewById(R.id.btnRoles);
 		btnGroups = (Button) findViewById(R.id.btnGroups);
 		btnFindGPS = (Button) findViewById(R.id.btnFindMe);
+		btnUpdateHumans = (Button) findViewById(R.id.btnUpdateHumans);
 	}
 	
 	private void setListeners() {
@@ -43,6 +45,7 @@ public class OpenActivity extends Activity implements View.OnClickListener {
 		btnRoles.setOnClickListener(this);
 		btnGroups.setOnClickListener(this);
 		btnFindGPS.setOnClickListener(this);
+		btnUpdateHumans.setOnClickListener(this);
 	}
 	
 	@Override
@@ -70,6 +73,10 @@ public class OpenActivity extends Activity implements View.OnClickListener {
 		case R.id.btnFindMe:
 			iFindGPS = new Intent().setClass(this, ThymeActivity.class);
 			startActivity(iFindGPS);
+			break;
+		case R.id.btnUpdateHumans:
+			iUpdateHumans = new Intent().setClass(this, ThymeUpdateHumans.class);
+			startActivity(iUpdateHumans);
 			break;
 		default:
 			break;

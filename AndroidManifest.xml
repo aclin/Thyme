@@ -31,8 +31,12 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".ThymeContacts"
+            android:name="org.enrichla.thyme.ThymeContacts"
             android:label="@string/title_activity_thyme_contacts" >
+        </activity>
+        <activity
+            android:name="org.enrichla.thyme.ThymeUpdateHumans"
+            android:label="@string/title_activity_thyme_update_humans" >
         </activity>
     </application>
 

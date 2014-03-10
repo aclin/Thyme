@@ -14,25 +14,48 @@
         android:layout_height="wrap_content"
         android:text="Locate me by GPS" />
     
-    <Button
-        android:id="@+id/btnContacts"
-        android:layout_width="wrap_content"
+    <TextView
+        android:id="@+id/tvSearchSection"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/btnFindMe"
+        android:background="#BBCCEE"
+        android:text="Search section" />
+    
+    <Button
+        android:id="@+id/btnContacts"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/tvSearchSection"
         android:text="Search by name" />
     
     <Button
         android:id="@+id/btnRoles"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/btnContacts"
         android:text="Search by role" />
     
     <Button
         android:id="@+id/btnGroups"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/btnRoles"
         android:text="Search by group" />
+    
+    <TextView
+        android:id="@+id/tvUpdateSection"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/btnGroups"
+        android:background="#BBCCEE"
+        android:text="Update records section" />
+    
+    <Button
+        android:id="@+id/btnUpdateHumans"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/tvUpdateSection"
+        android:text="Add a new subscriber" />
 
 </RelativeLayout>
