@@ -229,6 +229,7 @@ public class ThymeContacts extends Activity implements ThymeNetwork, View.OnClic
 //		}
 		listItem.clear();
 		entries.clear();
+		tvLoading.setVisibility(View.VISIBLE);
 		
 		String tmp;
 		switch (mCriteria) {

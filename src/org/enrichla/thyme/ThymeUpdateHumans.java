@@ -54,7 +54,7 @@ public class ThymeUpdateHumans extends Activity implements ThymeNetwork, View.On
 	private String[] arrRoles;
 	private int[] roleID;
 	
-	private Button btnSendUpdateFormHumans;
+	private Button btnSendUpdateFormHumans, btnClearUpdateFormHumans;
 	private Button btnAddRole, btnRemoveRole;
 	private Button btnAddGroup;
 	private EditText etUpdateFirstName, etUpdateLastName, etUpdateEmail;
@@ -95,6 +95,7 @@ public class ThymeUpdateHumans extends Activity implements ThymeNetwork, View.On
 		etUpdateLastName = (EditText) findViewById(R.id.etUpdateLastName);
 		etUpdateEmail = (EditText) findViewById(R.id.etUpdateEmail);
 		btnSendUpdateFormHumans = (Button) findViewById(R.id.btnSendUpdateFormHumans);
+		btnClearUpdateFormHumans = (Button) findViewById(R.id.btnClearUpdateFormHumans);
 	}
 	
 	private void setListeners() {
@@ -102,6 +103,7 @@ public class ThymeUpdateHumans extends Activity implements ThymeNetwork, View.On
 		btnRemoveRole.setOnClickListener(this);
 		btnAddGroup.setOnClickListener(this);
 		btnSendUpdateFormHumans.setOnClickListener(this);
+		btnClearUpdateFormHumans.setOnClickListener(this);
 	}
 	
 	private void setIDs() {
@@ -147,6 +149,7 @@ public class ThymeUpdateHumans extends Activity implements ThymeNetwork, View.On
 		case R.id.btnRemoveRole:
 			if (roleCount > 0) {
 				llUpdateRoleSection.removeViewAt(roleCount-1);
+				spinRoles[roleCount-1] = null;
 				roleCount--;	// Decrement roleCount by 1
 			}
 			break;
@@ -154,6 +157,16 @@ public class ThymeUpdateHumans extends Activity implements ThymeNetwork, View.On
 			break;
 		case R.id.btnSendUpdateFormHumans:
 			launchProgressDialog();
+			break;
+		case R.id.btnClearUpdateFormHumans:
+			etUpdateFirstName.setText("");
+			etUpdateLastName.setText("");
+			etUpdateEmail.setText("");
+			while (roleCount > 0) {
+				llUpdateRoleSection.removeViewAt(roleCount-1);
+				spinRoles[roleCount-1] = null;
+				roleCount--;	// Decrement roleCount by 1
+			}
 			break;
 		default:
 			break;
