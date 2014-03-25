@@ -14,6 +14,7 @@ import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.enrichla.thyme.network.ThymeNetwork;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -43,7 +44,7 @@ import android.widget.SimpleAdapter.ViewBinder;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class ThymeActivity extends Activity {
+public class ThymeActivity extends Activity implements ThymeNetwork {
 	
 	private static final String TAG = "ThymeActivity";
 	
@@ -53,7 +54,6 @@ public class ThymeActivity extends Activity {
     private static final int TEN_METERS = 10;
 	private static final int TWO_MINUTES = 1000 * 60 * 2;
 	
-	private static final String TOKEN = "925a3531d67c8358bbe1903c4649af1a";
 	private static final String MURSHAW_TOKEN = "cedbc4971aed515dc6d665f95f89e095";
 	private static final String mock = "5237 Rosemead Blvd, San Gabriel, CA";
 //	private static final String mocks[] = {"fox", "dog", "cat"};
@@ -174,8 +174,13 @@ public class ThymeActivity extends Activity {
     	mProgress = (ProgressBar) findViewById(R.id.pb_gps);
     }
 	
+	@Override
+	public JSONObject postData(String... data) throws JSONException {
+		return null;
+	}
+	
 	// Get data from Zoho Creator report
-	private JSONObject postData() throws JSONException {
+	public JSONObject getData() throws JSONException {
 //		HttpClient httpclient = HttpClientBuilder.create().build();
 		HttpClient httpclient = new DefaultHttpClient();
 		
@@ -252,7 +257,7 @@ public class ThymeActivity extends Activity {
 		return json;
 	}
 	
-	private void parseJSON(JSONArray ja) {
+	public void parseJSON(JSONArray ja) {
 		queryLength = ja.length();
     	arrFirstName = new String[queryLength];
     	arrLastName = new String[queryLength];
@@ -436,7 +441,7 @@ public class ThymeActivity extends Activity {
 		@Override
 		protected Void doInBackground(Void... params) {
 			try {
-    			mJson = postData();
+    			mJson = getData();
 //    			addresses = parseAddress(json);
 //    			Log.i(TAG, "Addresses: " + addresses.toString());
     		} catch (JSONException e) {
@@ -459,7 +464,7 @@ public class ThymeActivity extends Activity {
 		@Override
 		protected Void doInBackground(Void... unused) {
 			try {
-				JSONObject json = postData();
+				JSONObject json = getData();
 				if (json != null) {
 					JSONTokener token = new JSONTokener(json.getJSONArray("Sirius").toString());
 					Object obj;

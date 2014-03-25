@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item type="id" name="roleSpinner1" />
+    <item type="id" name="roleSpinner2" />
+    <item type="id" name="roleSpinner3" />
+    <item type="id" name="roleSpinner4" />
+    <item type="id" name="roleSpinner5" />
+    <item type="id" name="roleSpinner6" />
+    <item type="id" name="roleSpinner7" />
+    <item type="id" name="roleSpinner8" />
+    <item type="id" name="roleSpinner9" />
+    <item type="id" name="roleSpinner10" />
+</resources>

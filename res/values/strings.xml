@@ -11,10 +11,12 @@
     <string name="test">Test response goes here</string>
     <string name="title_activity_open">OpenActivity</string>
     <string name="title_activity_thyme_contacts">ThymeContacts</string>
+    
     <string name="search_criteria_fn">First Name</string>
     <string name="search_criteria_ln">Last Name</string>
     <string name="search_criteria_role">Role</string>
     <string name="search_criteria_group">Group</string>
+    
     <string name="update_criteria_fn">First Name</string>
     <string name="update_criteria_ln">Last Name</string>
     <string name="update_criteria_email">Email</string>

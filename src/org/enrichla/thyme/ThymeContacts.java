@@ -13,6 +13,7 @@ import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.enrichla.thyme.network.ThymeNetwork;
 import org.enrichla.thyme.util.Entry;
 import org.enrichla.thyme.util.SimpleCustomAdapter;
 import org.json.JSONArray;
@@ -37,12 +38,11 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
-import android.widget.SimpleAdapter;
 import android.widget.SimpleAdapter.ViewBinder;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class ThymeContacts extends Activity implements View.OnClickListener, TextView.OnEditorActionListener {
+public class ThymeContacts extends Activity implements ThymeNetwork, View.OnClickListener, TextView.OnEditorActionListener {
 	
 	private static final String TAG = "ThymeContacts";
 	
@@ -267,8 +267,13 @@ public class ThymeContacts extends Activity implements View.OnClickListener, Tex
 		new AsyncListTask().execute();
 	}
 	
+	@Override
+	public JSONObject postData(String... data) throws JSONException {
+		return null;
+	}
+	
 	// Get data from Zoho Creator report
-	private JSONObject postData() throws JSONException {
+	public JSONObject getData() throws JSONException {
 //			HttpClient httpclient = HttpClientBuilder.create().build();
 		HttpClient httpclient = new DefaultHttpClient();
 		
@@ -380,7 +385,7 @@ public class ThymeContacts extends Activity implements View.OnClickListener, Tex
 //		return json;
 	}
 	
-	private void parseJSON(JSONArray ja) {
+	public void parseJSON(JSONArray ja) {
 		queryLength = ja.length();
     	arrFirstName = new String[queryLength];
     	arrLastName = new String[queryLength];
@@ -419,7 +424,7 @@ public class ThymeContacts extends Activity implements View.OnClickListener, Tex
 		@Override
 		protected Void doInBackground(Void... unused) {
 			try {
-    			JSONObject json = postData();
+    			JSONObject json = getData();
     			if (json != null) {
     				String resultKey = "Human";
 					JSONTokener token = new JSONTokener(json.getJSONArray(resultKey).toString());
@@ -527,4 +532,5 @@ public class ThymeContacts extends Activity implements View.OnClickListener, Tex
 			tvLoading.setVisibility(View.GONE);
 		}
     }
+
 }
