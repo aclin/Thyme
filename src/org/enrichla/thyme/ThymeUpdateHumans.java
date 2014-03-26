@@ -27,8 +27,12 @@ import org.json.JSONObject;
 import org.json.JSONTokener;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.Dialog;
+import android.app.DialogFragment;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
@@ -51,7 +55,7 @@ public class ThymeUpdateHumans extends Activity implements ThymeNetwork, View.On
 	private Context context;
 	
 	private Spinner[] spinRoles = new Spinner[10];
-	private String[] arrRoles;
+	private String[] arrRoles = {"(Empty)"};
 	private int[] roleID;
 	
 	private Button btnSendUpdateFormHumans, btnClearUpdateFormHumans;
@@ -174,7 +178,7 @@ public class ThymeUpdateHumans extends Activity implements ThymeNetwork, View.On
 	}
 	
 	private void launchProgressDialog() {
-		final ProgressDialog progressDialog = ProgressDialog.show(this, "Update", "Sending new entry...");
+		final ProgressDialog progressDialog = ProgressDialog.show(this, "Update", "Uploading new entry...");
 		progressDialog.setCancelable(true);
 //		final String rd = roleData;
 		new Thread(new Runnable() {
@@ -186,6 +190,8 @@ public class ThymeUpdateHumans extends Activity implements ThymeNetwork, View.On
 					StringBuffer sb = new StringBuffer();
 					for (int i = 0; i < roleCount; i++) {
 						hmRoles.put((String)spinRoles[i].getSelectedItem(), true);
+					}
+					if (!hmRoles.isEmpty()) {
 						Set<String> set = hmRoles.keySet();
 						for (String s : set) {
 							sb.append(s);
@@ -193,12 +199,16 @@ public class ThymeUpdateHumans extends Activity implements ThymeNetwork, View.On
 						}
 						sb.deleteCharAt(sb.length()-1);
 					}
-					JSONObject json;
-					if (roleCount == 0)
+					JSONObject json = null;
+					if (roleCount == 0) {
 						json = postData(etUpdateFirstName.getText().toString(), etUpdateLastName.getText().toString(), etUpdateEmail.getText().toString());
-					else
+						Log.i(TAG, "No roles selected");
+					} else {
 						json = postData(etUpdateFirstName.getText().toString(), etUpdateLastName.getText().toString(), etUpdateEmail.getText().toString(), sb.toString());
-	    			if (json != null) {
+						Log.i(TAG, "Roles selected: " + sb.toString());
+					}
+	    			
+					if (json != null) {
 	    				response = json.getJSONArray("formname").getJSONArray(1).getJSONObject(1).getString("Status");
 	    				
 					} else {
@@ -225,19 +235,7 @@ public class ThymeUpdateHumans extends Activity implements ThymeNetwork, View.On
 	public JSONObject postData(String... data) throws JSONException {
 		HttpClient httpclient = new DefaultHttpClient();
 		
-		String zview = "Human";
-//		https://creator.zoho.com/api/ashleyritarivers/json/thyme/form/Human/record/add/
-		String uri = "https://creator.zoho.com/api/ashleyritarivers/json/thyme/form/Human/record/add/";//?" +
-//				"authtoken=" + TOKEN +
-//				"&scope=creatorapi" +
-//				"&raw=true" +
-//				"&First_Name=" + data[0] +
-//				"&Last_Name=" + data[1] +
-//				"&Email=" + data[2];
-//		
-//		if (data.length == 4) {
-//			uri += "&Role=" + data[3];
-//		}
+		String uri = "https://creator.zoho.com/api/ashleyritarivers/json/thyme/form/Human/record/add/";
 		
 		HttpPost httppost = new HttpPost(uri);
 		httppost.setHeader("User-Agent", "Mozilla/5.0");
@@ -255,19 +253,9 @@ public class ThymeUpdateHumans extends Activity implements ThymeNetwork, View.On
 		try {
 			httppost.setEntity(new UrlEncodedFormEntity(urlParameters));
 		} catch (UnsupportedEncodingException e1) {
-			// TODO Auto-generated catch block
+			Log.e(TAG, "UnsupportedEncodingException:");
 			e1.printStackTrace();
 		}
-//		HttpParams params = httppost.getParams();
-//		params.setParameter("authtoken", TOKEN);
-//		params.setParameter("scope", "creatorapi");
-//		params.setParameter("raw", "true");
-//		params.setParameter("First_Name", data[0]);
-//		params.setParameter("Last_Name", data[1]);
-//		params.setParameter("Email", data[2]);
-//		if (data.length == 4)
-//			params.setParameter("Role", data[3]);
-//		httppost.setParams(params);
 		
 		JSONObject json = null;
 		
@@ -361,6 +349,7 @@ public class ThymeUpdateHumans extends Activity implements ThymeNetwork, View.On
 		} catch (IOException e) {
 			Log.e(TAG, "IO Exception:");
 			e.printStackTrace();
+			new ConnectionErrorDialogFragment().show(getFragmentManager(), "RolesConnectionErrorDialog");
 		}
 		return json;
 	}
@@ -437,4 +426,30 @@ public class ThymeUpdateHumans extends Activity implements ThymeNetwork, View.On
 		
 	}
     
+	/**
+	 * Alert dialog when connection fails to get Roles information
+	 */
+	public static class ConnectionErrorDialogFragment extends DialogFragment {
+		
+		@Override
+		public Dialog onCreateDialog(Bundle savedInstanceState) {
+			AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+			builder.setTitle("No Internet Connection")
+				.setMessage("Cannot connect to the internet. New data cannot be added at this time.\nPlease check that you are connected to the internet.")
+				.setPositiveButton("Dismiss", new DialogInterface.OnClickListener() {
+					
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						dismiss();
+					}
+				});
+			return builder.create();
+		}
+		
+		@Override
+	     public void onCancel(DialogInterface dialog) {
+			dismiss();
+	     }
+	}
+	
 }
