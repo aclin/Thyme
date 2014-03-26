@@ -7,7 +7,8 @@ public class Entry {
 	public String lname;
 	public String email;
 	public String site;
-	public String number;
+	public String role;
+	public String mobile;
 	
 	public Entry() {
 		// Empty constructor

@@ -137,11 +137,13 @@ public class ThymeContacts extends Activity implements ThymeNetwork, View.OnClic
         													"ItemLastName",
         													"ItemEmail",
         													"ItemSite",
-        													"ItemNumber" },
+        													"ItemRole",
+        													"ItemMobile" },
         									new int[] {	R.id.lvFirstName,
         												R.id.lvLastName,
         												R.id.lvEmail,
         												R.id.lvSite,
+        												R.id.lvRole,
         												R.id.lvNumber});
 		lvContacts.setAdapter(listItemAdapter);
 	}
@@ -358,20 +360,6 @@ public class ThymeContacts extends Activity implements ThymeNetwork, View.OnClic
 //						}
 //					});
 				json = new JSONObject(responseString);
-//				String s = json.getJSONArray("Sirius").toString();
-//				Log.i("S DATA", s);
-//				JSONTokener jsonToken = new JSONTokener(s);
-//				Object obj;
-//				while (jsonToken.more()) {
-//					obj = jsonToken.nextValue();
-//					Log.i("DATA", obj.toString());
-//					if (obj instanceof JSONArray) {
-//						JSONArray result = (JSONArray) obj;
-//						parseJSON(result);
-//					} else {
-//						Log.i("DATA", "NOT JSON Array!");
-//					}
-//				}
 			}
 		} catch (ClientProtocolException e) {
 			Log.e(TAG, "Client Protocol Exception:");
@@ -380,37 +368,27 @@ public class ThymeContacts extends Activity implements ThymeNetwork, View.OnClic
 			Log.e(TAG, "IO Exception:");
 			e.printStackTrace();
 		} finally {
-			return json;
+			
 		}
 		
-//		return json;
+		return json;
 	}
 	
 	public void parseJSON(JSONArray ja) {
 		queryLength = ja.length();
-    	arrFirstName = new String[queryLength];
-    	arrLastName = new String[queryLength];
-    	arrEmail = new String[queryLength];
-    	arrSite = new String[queryLength];
-//    	arrNumber = new int[queryLength];
-    	arrNumber = new String[queryLength];
     	try {
     		for (int i=0; i < ja.length(); i++) {
     			Entry person = new Entry();
         		person.fname = ja.getJSONObject(i).getString("First_Name");
         		person.lname = ja.getJSONObject(i).getString("Last_Name");
     			person.email = ja.getJSONObject(i).getString("Email");
-    			person.site = ja.getJSONObject(i).getString("Site");
-    			person.number = "2135551234";
+    			String s = ja.getJSONObject(i).getString("Site");
+    			person.site = s.substring(1, s.length()-1);
+    			String r = ja.getJSONObject(i).getString("Role");
+    			person.role = r.substring(1, r.length()-1);
+    			person.mobile = ja.getJSONObject(i).getString("Mobile");
     			entries.add(person);
     			
-//    			arrFirstName[i] = ja.getJSONObject(i).getString("First_Name");
-//    			arrLastName[i] = ja.getJSONObject(i).getString("Last_Name");
-//    			arrEmail[i] = ja.getJSONObject(i).getString("Email");
-//    			arrSite[i] = ja.getJSONObject(i).getString("Site");
-////    			arrNumber[i] = ja.getJSONObject(i).getInt("Telephone");
-////    			arrNumber[i] = ja.getJSONObject(i).getString("Telephone");
-//    			arrNumber[i] = "2135551234";
     		}
     		
     	} catch (JSONException je) {
@@ -448,22 +426,14 @@ public class ThymeContacts extends Activity implements ThymeNetwork, View.OnClic
     			e.printStackTrace();
     		}
 			Collections.sort(entries, Entry.COMPARE_FNAME);
-//			for (int i = 0; i < queryLength; i++) {
-//				HashMap<String, Object> map = new HashMap<String, Object>();
-//				map.put("ItemFirstName", arrFirstName[i]);
-//				map.put("ItemLastName", arrLastName[i]);
-//				map.put("ItemEmail", arrEmail[i]);
-//				map.put("ItemSite", arrSite[i]);
-//				map.put("ItemNumber", arrNumber[i]);
-//				publishProgress(map);
-//			}
 			for (Entry e : entries) {
 				HashMap<String, Object> map = new HashMap<String, Object>();
 				map.put("ItemFirstName", e.fname);
 				map.put("ItemLastName", e.lname);
 				map.put("ItemEmail", e.email);
 				map.put("ItemSite", e.site);
-				map.put("ItemNumber", e.number);
+				map.put("ItemRole", e.role);
+				map.put("ItemMobile", e.mobile);
 				publishProgress(map);
 				
 			}
@@ -523,7 +493,7 @@ public class ThymeContacts extends Activity implements ThymeNetwork, View.OnClic
 //					newAct.putExtra("bImage", bImage);
 //					startActivityForResult(newAct, INDIVIDUAL_REQUEST);
 					
-					Toast.makeText(context, itemAtPosition.get("ItemNumber").toString(), Toast.LENGTH_SHORT).show();
+					Toast.makeText(context, itemAtPosition.get("ItemMobile").toString(), Toast.LENGTH_SHORT).show();
 				}
 			});
 		}

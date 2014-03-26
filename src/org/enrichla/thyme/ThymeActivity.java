@@ -116,11 +116,13 @@ public class ThymeActivity extends Activity implements ThymeNetwork {
         													"ItemLastName",
         													"ItemEmail",
         													"ItemSite",
-        													"ItemNumber" },
+        													"ItemRole",
+        													"ItemMobile" },
         									new int[] {	R.id.lvFirstName,
         												R.id.lvLastName,
         												R.id.lvEmail,
         												R.id.lvSite,
+        												R.id.lvRole,
         												R.id.lvNumber});
 		lvContacts.setAdapter(listItemAdapter);
 	}
@@ -491,7 +493,7 @@ public class ThymeActivity extends Activity implements ThymeNetwork {
 				map.put("ItemLastName", arrLastName[i]);
 				map.put("ItemEmail", arrEmail[i]);
 				map.put("ItemSite", arrSite[i]);
-				map.put("ItemNumber", arrNumber[i]);
+				map.put("ItemMobile", arrNumber[i]);
 				publishProgress(map);
 			}
 			return null;
@@ -550,7 +552,7 @@ public class ThymeActivity extends Activity implements ThymeNetwork {
 //					newAct.putExtra("bImage", bImage);
 //					startActivityForResult(newAct, INDIVIDUAL_REQUEST);
 					
-					Toast.makeText(context, itemAtPosition.get("ItemNumber").toString(), Toast.LENGTH_SHORT).show();
+					Toast.makeText(context, itemAtPosition.get("ItemMobile").toString(), Toast.LENGTH_SHORT).show();
 				}
 			});
 		}
@@ -593,7 +595,7 @@ public class ThymeActivity extends Activity implements ThymeNetwork {
 								hmap.put("ItemLastName", ja.getJSONObject(i).getString("Last_Name"));
 								hmap.put("ItemEmail", ja.getJSONObject(i).getString("Email"));
 								hmap.put("ItemSite", ja.getJSONObject(i).getString("Location"));
-								hmap.put("ItemNumber", ja.getJSONObject(i).getString("Telephone"));
+								hmap.put("ItemMobile", ja.getJSONObject(i).getString("Mobile"));
 								tree.put(haversine(mLat, mLng, a.getLatitude(), a.getLongitude()), hmap);
 							}
 						}
