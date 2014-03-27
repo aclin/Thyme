@@ -15,6 +15,7 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.enrichla.thyme.network.ThymeNetwork;
+import org.enrichla.thyme.util.Entry;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -76,9 +77,13 @@ public class ThymeActivity extends Activity implements ThymeNetwork {
 	private SimpleAdapter listItemAdapter;
 	private int queryLength;
 	
+	private RequestMemberInfoTask requestMemberInfoTask;
 	private JSONObject mJson;
 	private ArrayList<String> addresses;
 	private TreeMap<Double, HashMap<String, Object>> tree;
+	private TreeMap<Double, String> tree2;
+	private ArrayList<Entry> entries;
+	private boolean memberInfoComplete;
 	
 	private String[] arrFirstName;
 	private String[] arrLastName;
@@ -108,6 +113,8 @@ public class ThymeActivity extends Activity implements ThymeNetwork {
 //            }
 //        };
         
+		requestMemberInfoTask = new RequestMemberInfoTask();
+		entries = new ArrayList<Entry>();
         listItem = new ArrayList<HashMap<String, Object>>();
         listItemAdapter = new SimpleAdapter(this,
         									listItem,
@@ -139,22 +146,9 @@ public class ThymeActivity extends Activity implements ThymeNetwork {
 		super.onStart();
 		initLocationTrack();
 //		new GeocodeTask().execute(mock);
+		requestMemberInfoTask.execute();
 		new HttpRequestTask().execute();
 //		new AsyncListTask().execute();
-
-		
-		
-//		Geocoder geo = new Geocoder(this);
-//		try {
-//			List<Address> list = geo.getFromLocationName(mock, 1);
-//			Address add = list.get(0);
-//			double lat = add.getLatitude();
-//			double lng = add.getLongitude();
-//			tvMock.setText("Latitude: " + lat + "\nLongitude: " + lng);
-//		} catch (IOException e) {
-//			Log.d(TAG, "More problems");
-//			e.printStackTrace();
-//		}
 	}
 	
 	@Override
@@ -182,16 +176,9 @@ public class ThymeActivity extends Activity implements ThymeNetwork {
 	}
 	
 	// Get data from Zoho Creator report
-	public JSONObject getData() throws JSONException {
-//		HttpClient httpclient = HttpClientBuilder.create().build();
+	public JSONObject getData(String zview) throws JSONException {
 		HttpClient httpclient = new DefaultHttpClient();
 		
-//		HttpGet httpget = new HttpGet("https://creator.zoho.com/api/json/blacky/view/Sirius_Report?authtoken=cedbc4971aed515dc6d665f95f89e095&scope=creatorapi&raw=true");
-//		HttpGet httpget = new HttpGet("https://creator.zoho.com/api/json/blacky/view/Sirius_Report");
-//		httpget.getParams().setParameter("authtoken", MURSHAW_TOKEN);
-//		httpget.getParams().setParameter("scope", "creatorapi");
-//		httpget.getParams().setParameter("raw", "true");
-		String zview = "Humans";
 		String uri = "https://creator.zoho.com/api/json/thyme/view/" + zview + "?" +
 						"authtoken=" + TOKEN +
 						"&scope=creatorapi&raw=true";
@@ -269,12 +256,18 @@ public class ThymeActivity extends Activity implements ThymeNetwork {
     	arrNumber = new String[queryLength];
     	try {
     		for (int i=0; i < ja.length(); i++) {
-    			arrFirstName[i] = ja.getJSONObject(i).getString("First_Name");
-    			arrLastName[i] = ja.getJSONObject(i).getString("Last_Name");
-    			arrEmail[i] = ja.getJSONObject(i).getString("Email");
-    			arrSite[i] = ja.getJSONObject(i).getString("Location");
-//    			arrNumber[i] = ja.getJSONObject(i).getInt("Telephone");
-    			arrNumber[i] = ja.getJSONObject(i).getString("Telephone");
+    			if (!ja.getJSONObject(i).getString("Site").equals("[]")) {
+    				Entry person = new Entry();
+    				person.fname = ja.getJSONObject(i).getString("First_Name");
+            		person.lname = ja.getJSONObject(i).getString("Last_Name");
+        			person.email = ja.getJSONObject(i).getString("Email");
+        			String s = ja.getJSONObject(i).getString("Site");
+        			person.site = s.substring(1, s.length()-1);
+        			String r = ja.getJSONObject(i).getString("Role");
+        			person.role = r.substring(1, r.length()-1);
+        			person.mobile = ja.getJSONObject(i).getString("Mobile");
+        			entries.add(person);
+    			}
     		}
     	} catch (JSONException je) {
     		Log.e(TAG, "Parse JSON Error:");
@@ -438,14 +431,48 @@ public class ThymeActivity extends Activity implements ThymeNetwork {
         }
     };
     
+    private class RequestMemberInfoTask extends AsyncTask<Void, Void, Void> {
+    	
+    	@Override
+    	protected Void doInBackground(Void... params) {
+    		try {
+    			JSONObject json = getData("Humans");
+    			if (json != null) {
+    				String resultKey = "Human";
+					JSONTokener token = new JSONTokener(json.getJSONArray(resultKey).toString());
+					Object obj;
+					while (token.more()) {
+						obj = token.nextValue();
+						Log.i("DATA", obj.toString());
+						if (obj instanceof JSONArray) {
+							JSONArray result = (JSONArray) obj;
+							parseJSON(result);
+						} else {
+							Log.i("DATA", "NOT JSON Array!");
+						}
+					}
+				} else {
+					// Some manner of server error since there was no response
+				}
+    		} catch (JSONException e) {
+    			Log.e(TAG, "JSON Exception Error:");
+    			e.printStackTrace();
+    		}
+    		return null;
+    	}
+    	
+    	@Override
+    	protected void onPostExecute(Void unused) {
+    		
+    	}
+    }
+    
     private class HttpRequestTask extends AsyncTask<Void, Void, Void> {
 
 		@Override
 		protected Void doInBackground(Void... params) {
 			try {
-    			mJson = getData();
-//    			addresses = parseAddress(json);
-//    			Log.i(TAG, "Addresses: " + addresses.toString());
+    			mJson = getData("Sites");
     		} catch (JSONException e) {
     			Log.e(TAG, "JSON Exception Error:");
     			e.printStackTrace();
@@ -466,7 +493,7 @@ public class ThymeActivity extends Activity implements ThymeNetwork {
 		@Override
 		protected Void doInBackground(Void... unused) {
 			try {
-				JSONObject json = getData();
+				JSONObject json = getData("Humans");
 				if (json != null) {
 					JSONTokener token = new JSONTokener(json.getJSONArray("Sirius").toString());
 					Object obj;
@@ -570,9 +597,10 @@ public class ThymeActivity extends Activity implements ThymeNetwork {
 		protected Void doInBackground(Void... unused) {
 			gc = new Geocoder(context);
 			tree = new TreeMap<Double, HashMap<String, Object>>();
+			tree2 = new TreeMap<Double, String>();
 			try {
 				if (Geocoder.isPresent()) {
-					JSONTokener token = new JSONTokener(mJson.getJSONArray("Sirius").toString());
+					JSONTokener token = new JSONTokener(mJson.getJSONArray("Site").toString());
 					while (token.more()) {
 						Object obj = token.nextValue();
 						if (obj instanceof JSONArray) {
@@ -583,20 +611,22 @@ public class ThymeActivity extends Activity implements ThymeNetwork {
 												+ " "
 												+ ja.getJSONObject(i).getString("City")
 												+ " "
-												+ ja.getJSONObject(i).getString("State1")
+												+ ja.getJSONObject(i).getString("State")
 												+ " "
 												+ ja.getJSONObject(i).getString("Zip");
-								
+								Log.i(TAG, "Address: " + address);
 								List<Address> place = gc.getFromLocationName(address, 1);
 								Address a = place.get(0);
 								
-								HashMap<String, Object> hmap = new HashMap<String, Object>();
-								hmap.put("ItemFirstName", ja.getJSONObject(i).getString("First_Name"));
-								hmap.put("ItemLastName", ja.getJSONObject(i).getString("Last_Name"));
-								hmap.put("ItemEmail", ja.getJSONObject(i).getString("Email"));
-								hmap.put("ItemSite", ja.getJSONObject(i).getString("Location"));
-								hmap.put("ItemMobile", ja.getJSONObject(i).getString("Mobile"));
-								tree.put(haversine(mLat, mLng, a.getLatitude(), a.getLongitude()), hmap);
+//								HashMap<String, Object> hmap = new HashMap<String, Object>();
+//								hmap.put("ItemFirstName", ja.getJSONObject(i).getString("First_Name"));
+//								hmap.put("ItemLastName", ja.getJSONObject(i).getString("Last_Name"));
+//								hmap.put("ItemEmail", ja.getJSONObject(i).getString("Email"));
+//								hmap.put("ItemSite", ja.getJSONObject(i).getString("Location"));
+//								hmap.put("ItemMobile", ja.getJSONObject(i).getString("Mobile"));
+//								tree.put(haversine(mLat, mLng, a.getLatitude(), a.getLongitude()), hmap);
+								
+								tree2.put(haversine(mLat, mLng, a.getLatitude(), a.getLongitude()), ja.getJSONObject(i).getString("Name"));
 							}
 						}
 					}
@@ -617,21 +647,38 @@ public class ThymeActivity extends Activity implements ThymeNetwork {
 		protected void onPostExecute(Void unused) {
 //			tvMock.setText("Latitude: " + mLat + "\nLongitude: " + mLng);
 //			Log.i(TAG + ".TREE", tree.toString());
-			
+			while (requestMemberInfoTask.getStatus() != AsyncTask.Status.FINISHED) {
+				// wait until RequestMemberInfoTask is complete so we have the member information
+			}
 			tvLoading.setVisibility(View.GONE);
 			mProgress.setVisibility(View.GONE);
 			
-			for (Double d : tree.keySet()) {
-				listItem.add(tree.get(d));
+			for (Double d : tree2.keySet()) {
+				for (Entry e : entries) {
+					if (e.site.equals(tree2.get(d))) {
+						HashMap<String, Object> map = new HashMap<String, Object>();
+						map.put("ItemFirstName", e.fname);
+						map.put("ItemLastName", e.lname);
+						map.put("ItemEmail", e.email);
+						map.put("ItemSite", e.site);
+						map.put("ItemRole", e.role);
+						map.put("ItemMobile", e.mobile);
+						listItem.add(map);
+					}
+				}
 			}
+			
+//			for (Double d : tree.keySet()) {
+//				listItem.add(tree.get(d));
+//			}
 			listItemAdapter.setViewBinder(new ViewBinder() {    
 	            
 	            @Override
-				public boolean setViewValue(View view, Object data, String textRepresentation) {    
-	                if (view instanceof ImageView  && data instanceof Bitmap) {    
+				public boolean setViewValue(View view, Object data, String textRepresentation) {
+	                if (view instanceof ImageView  && data instanceof Bitmap) {
 	                    ImageView iv = (ImageView) view;
 	                    iv.setImageBitmap((Bitmap) data);    
-	                    return true;    
+	                    return true;
 	                } else {
 	                	return false;
 	                }
@@ -643,7 +690,7 @@ public class ThymeActivity extends Activity implements ThymeNetwork {
 				@Override
 				public void onItemClick(AdapterView<?> arg0, View arg1, int position, final long id) {
 					HashMap<String, Object> itemAtPosition = listItem.get(position);
-					Toast.makeText(context, itemAtPosition.get("ItemNumber").toString(), Toast.LENGTH_SHORT).show();
+					Toast.makeText(context, itemAtPosition.get("ItemMobile").toString(), Toast.LENGTH_SHORT).show();
 				}
 			});
 		}

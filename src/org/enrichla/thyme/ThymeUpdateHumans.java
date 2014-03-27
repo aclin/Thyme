@@ -297,10 +297,8 @@ public class ThymeUpdateHumans extends Activity implements ThymeNetwork, View.On
 	}
 	
 	// Get data from Zoho Creator report
-	public JSONObject getData() throws JSONException {
+	public JSONObject getData(String zview) throws JSONException {
 		HttpClient httpclient = new DefaultHttpClient();
-		
-		String zview = "Roles";
 		
 		String uri = "https://creator.zoho.com/api/json/thyme/view/" + zview + "?" +
 						"authtoken=" + TOKEN +
@@ -376,7 +374,7 @@ public class ThymeUpdateHumans extends Activity implements ThymeNetwork, View.On
 		@Override
 		protected Void doInBackground(Void... unused) {
 			try {
-    			JSONObject json = getData();
+    			JSONObject json = getData("Roles");
     			if (json != null) {
     				String resultKey = "Role";
 					JSONTokener token = new JSONTokener(json.getJSONArray(resultKey).toString());

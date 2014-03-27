@@ -276,7 +276,7 @@ public class ThymeContacts extends Activity implements ThymeNetwork, View.OnClic
 	}
 	
 	// Get data from Zoho Creator report
-	public JSONObject getData() throws JSONException {
+	public JSONObject getData(String zview) throws JSONException {
 //			HttpClient httpclient = HttpClientBuilder.create().build();
 		HttpClient httpclient = new DefaultHttpClient();
 		
@@ -285,8 +285,6 @@ public class ThymeContacts extends Activity implements ThymeNetwork, View.OnClic
 //		httpget.getParams().setParameter("authtoken", TOKEN);
 //		httpget.getParams().setParameter("scope", "creatorapi");
 //		httpget.getParams().setParameter("raw", "true");
-		
-		String zview = "Humans";
 		
 		String uri = "https://creator.zoho.com/api/json/thyme/view/" + zview + "?" +
 						"authtoken=" + TOKEN +
@@ -388,7 +386,6 @@ public class ThymeContacts extends Activity implements ThymeNetwork, View.OnClic
     			person.role = r.substring(1, r.length()-1);
     			person.mobile = ja.getJSONObject(i).getString("Mobile");
     			entries.add(person);
-    			
     		}
     		
     	} catch (JSONException je) {
@@ -403,7 +400,7 @@ public class ThymeContacts extends Activity implements ThymeNetwork, View.OnClic
 		@Override
 		protected Void doInBackground(Void... unused) {
 			try {
-    			JSONObject json = getData();
+    			JSONObject json = getData("Humans");
     			if (json != null) {
     				String resultKey = "Human";
 					JSONTokener token = new JSONTokener(json.getJSONArray(resultKey).toString());
